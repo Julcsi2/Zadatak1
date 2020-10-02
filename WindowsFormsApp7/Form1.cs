@@ -276,6 +276,8 @@ namespace WindowsFormsApp7
             button5.Enabled= checkBox1.Checked;
             button6.Enabled= checkBox1.Checked;
             button7.Enabled = checkBox1.Checked;
+            button7.Enabled = checkBox1.Checked;
+            textBox5.Enabled = checkBox1.Checked;
         }
         string filePath = string.Empty;
         private void btnUcitaj_Click(object sender, EventArgs e)   ////////////za čitanje iz datoteke
@@ -1477,5 +1479,159 @@ namespace WindowsFormsApp7
                 }
             }
         }
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+            provjereno();
+        }
+
+        private void button8_Click(object sender, EventArgs e)        /// sastavljanje novih riječi pomoću riječi iz riječnika
+        {
+            provjereno();
+            Dictionary<int, string> Rijecnik = new Dictionary<int, string>();   //riječnik
+            int a = 0;
+            try
+            {
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line1;
+
+                    while ((line1 = sr.ReadLine()) != null)
+                    {
+                        //string[] pomocna = line1.Split();
+                        //MessageBox.Show(a.ToString());
+
+                        Rijecnik.Add(a, line1);
+                        a++;
+                    }
+                }
+            }
+            catch (Exception x)
+            {
+                // Let the user know what went wrong.
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(x.Message);
+            }
+
+            int upisana_duljina = Convert.ToInt32(textBox5.Text);           ////////program
+            
+            StringBuilder rj = new StringBuilder();
+            rj.Clear();
+            int duljina = 2;
+
+            while (duljina <= upisana_duljina)
+            {
+                if (duljina == 2)
+                {
+                    for (int i = 0; i < a; i++)
+                    {
+                        for (int j = i + 1; j < a; j++)
+                        {
+                            for (int k = 0; k < 2; k++)
+                            {
+                                if (k == 0)
+                                {
+                                    rj.Append(Rijecnik[i]);
+                                    rj.Append(" ");
+                                    rj.Append(Rijecnik[j]);
+                                    provjera(rj.ToString());
+                                    rj.Clear();
+                                    rj.Append(Rijecnik[i]);
+                                    rj.Append(Rijecnik[j]);
+                                    provjera(rj.ToString());
+                                    rj.Clear();
+                                }
+                                else
+                                {
+                                    rj.Append(Rijecnik[j]);
+                                    rj.Append(" ");
+                                    rj.Append(Rijecnik[i]);
+                                    provjera(rj.ToString());
+                                    rj.Clear();
+                                    rj.Append(Rijecnik[j]);
+                                    rj.Append(Rijecnik[i]);
+                                    provjera(rj.ToString());
+                                    rj.Clear();
+                                }
+                            }
+                            if (j == i - 1)
+                            {
+                                j = a - 1;
+                            }
+                            else if (j == a - 1 && i != 0)
+                            {
+                                j = -1;
+                            }
+                        }
+                    }
+                    duljina++;
+                }
+                else if (duljina == 3)
+                {
+                    for (int i = 0; i < a; i++)
+                    {
+                        for (int j = 0; j < a; j++)
+                        {
+                            for (int k = 0; k < a; k++)
+                            {
+                                if (i != j && j != k && k != i)
+                                {
+                                    for (int b = 0; b < 3; b++)
+                                    {
+                                        if (b == 0)
+                                        {
+                                            rj.Append(Rijecnik[i]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[j]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[k]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                            rj.Append(Rijecnik[i]);
+                                            rj.Append(Rijecnik[j]);
+                                            rj.Append(Rijecnik[k]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                        }
+                                        else if (b == 1)
+                                        {
+                                            rj.Append(Rijecnik[j]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[k]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[i]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                            rj.Append(Rijecnik[j]);
+                                            rj.Append(Rijecnik[k]);
+                                            rj.Append(Rijecnik[i]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                        }
+                                        else
+                                        {
+                                            rj.Append(Rijecnik[k]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[i]);
+                                            rj.Append(" ");
+                                            rj.Append(Rijecnik[j]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                            rj.Append(Rijecnik[k]);
+                                            rj.Append(Rijecnik[i]);
+                                            rj.Append(Rijecnik[j]);
+                                            provjera(rj.ToString());
+                                            rj.Clear();
+                                        }
+                                    }
+                                }//kraj if-a i for petlje koja broji 
+                            }
+
+                        }
+                    }
+                    duljina++;
+                }
+            }
+            }
     }
 }
