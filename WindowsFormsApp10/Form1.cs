@@ -90,5 +90,25 @@ namespace WindowsFormsApp10
                 fileovi.Items.Add(s);
             }
         }
+
+        private void button7_Click(object sender, EventArgs e)   //kako iz nekog mjesta prebaciti datoteku u našu otvorenu mapu
+        {
+            string path1 = textBox7.Text;
+            
+            string[] stringSeparators = new string[] { "\\" };
+            string[] novo =path1.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+            
+            string path2 = filePath + @"\"+ novo[novo.Length-1];
+            File.Move(path1, path2);
+
+            fileovi.Items.Clear();
+            string[] nazivi_datoteka = System.IO.Directory.GetFileSystemEntries(filePath);
+            foreach (string s in nazivi_datoteka)
+            {
+                fileovi.Items.Add(s);
+            }
+
+            textBox7.Text = "";
+        }
     }
 }
