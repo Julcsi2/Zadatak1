@@ -1,0 +1,10 @@
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\bin\Debug\WindowsFormsApp10.exe.config
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\bin\Debug\WindowsFormsApp10.exe
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\bin\Debug\WindowsFormsApp10.pdb
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.csprojAssemblyReference.cache
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.Form1.resources
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.Properties.Resources.resources
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.csproj.GenerateResource.cache
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.csproj.CoreCompileInputs.cache
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.exe
+C:\Users\Júlia\source\Praksa vježba\WindowsFormsApp10\obj\Debug\WindowsFormsApp10.pdb
