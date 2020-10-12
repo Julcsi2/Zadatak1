@@ -27,14 +27,28 @@ namespace WindowsFormsApp11
         int a = 0;
         private void button1_Click(object sender, EventArgs e)     ///dodavanje albuma u listu
         {
-            Rijecnik.Add(a, textBox1.Text);
-            a++;
+            if (Directory.Exists(textBox1.Text))/// dodala provjeru za postojanje albuma
+            {                                   
+                Rijecnik.Add(a, textBox1.Text);
+                a++;
 
-            string[] stringSeparators = new string[] { "\\" };
-            string[] novo = textBox1.Text.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-            string naziv_albuma = novo[novo.Length - 1];
-            Albumi.Items.Add(naziv_albuma);
+                string[] stringSeparators = new string[] { "\\" };
+                string[] novo = textBox1.Text.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                string naziv_albuma = novo[novo.Length - 1];
+                Albumi.Items.Add(naziv_albuma);
+            }
+            else
+            {
+                DirectoryInfo novi_album = Directory.CreateDirectory(textBox1.Text);   //napravi novi album ako ne postoji odabrani
 
+                Rijecnik.Add(a, textBox1.Text);
+                a++;
+
+                string[] stringSeparators = new string[] { "\\" };
+                string[] novo = textBox1.Text.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                string naziv_albuma = novo[novo.Length - 1];
+                Albumi.Items.Add(naziv_albuma);
+            }
         }
         Button tipka_x = new Button();
 
@@ -72,33 +86,72 @@ namespace WindowsFormsApp11
 
         private void button4_Click(object sender, EventArgs e)   //dodavanje slika u obliku cut-paste
         {
-            string zadnji_put = nazivi_puteva[nazivi_puteva.Length - 1];
-            StringBuilder put = new StringBuilder();
-            string[] stringSeparators = new string[] { "\\" };
-            string[] novo = zadnji_put.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < novo.Length-1;i++) 
+            string zadnji_put = "";
+            if (nazivi_puteva.Length==0) 
             {
-                put.Append(novo[i] + "\\");
+                zadnji_put = Rijecnik[indeks_odabranog_albuma];
+
+                StringBuilder put = new StringBuilder();
+                string[] stringSeparators = new string[] { "\\" };
+                string[] novo = zadnji_put.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < novo.Length ; i++)
+                {
+                    put.Append(novo[i] + "\\");
+                }
+
+                string[] imena = { };
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Multiselect = true;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    imena = openFileDialog.FileNames;
+                }
+
+                for (int i = 0; i < imena.Length; i++)
+                {
+                    string[] stringSeparators2 = new string[] { "\\" };
+                    string[] novo2 = imena[i].Split(stringSeparators2, StringSplitOptions.RemoveEmptyEntries);
+                    string naziv_slike = novo2[novo2.Length - 1];
+                    Slike.Items.Add(naziv_slike + "      ");
+
+                    File.Move(imena[i], put.ToString() + naziv_slike);
+
+                    nazivi_puteva = System.IO.Directory.GetFileSystemEntries(Rijecnik[indeks_odabranog_albuma]);
+                }
             }
+            else 
+            { 
+                zadnji_put = nazivi_puteva[nazivi_puteva.Length - 1];
 
-            string[] imena = { };
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                imena = openFileDialog.FileNames;
+                StringBuilder put = new StringBuilder();
+                string[] stringSeparators = new string[] { "\\" };
+                string[] novo = zadnji_put.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < novo.Length - 1; i++)
+                {
+                    put.Append(novo[i] + "\\");
+                }
+
+                string[] imena = { };
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Multiselect = true;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    imena = openFileDialog.FileNames;
+                }
+
+                for (int i = 0; i < imena.Length; i++)
+                {
+                    string[] stringSeparators2 = new string[] { "\\" };
+                    string[] novo2 = imena[i].Split(stringSeparators2, StringSplitOptions.RemoveEmptyEntries);
+                    string naziv_slike = novo2[novo2.Length - 1];
+                    Slike.Items.Add(naziv_slike + "      ");
+
+                    File.Move(imena[i], put.ToString() + naziv_slike);
+
+                    nazivi_puteva = System.IO.Directory.GetFileSystemEntries(Rijecnik[indeks_odabranog_albuma]);
+                }
             }
-
-            for(int i = 0; i < imena.Length; i++)
-            {
-                string[] stringSeparators2 = new string[] { "\\" };
-                string[] novo2 = imena[i].Split(stringSeparators2, StringSplitOptions.RemoveEmptyEntries);
-                string naziv_slike = novo2[novo2.Length - 1];
-                Slike.Items.Add(naziv_slike + "      ");
-
-                File.Move(imena[i], put.ToString()+naziv_slike);
-
-                nazivi_puteva= System.IO.Directory.GetFileSystemEntries(Rijecnik[indeks_odabranog_albuma]);
-            }
+            
 
         }
 
