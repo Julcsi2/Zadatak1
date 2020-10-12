@@ -13,54 +13,143 @@ namespace WindowsFormsApp11
 {
     public partial class Form1 : Form
     {
+        int a = 0;
         public Form1()
         {
             InitializeComponent();
-        }
+            int br1 = 0;
+            int br2 = 0;
+            string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //ispis iz datoteke
+            if (File.Exists(path))/// dodala provjeru za postojanje datoteke
+            {
+                try
+                {
+                    using (StreamReader sr = new StreamReader(path))
+                    {
+                        string line1;
+                        while ((line1 = sr.ReadLine()) != null)
+                        {
+                            string[] tri = line1.Split();
+                            //Albumi.Items.Add(line1);
+                            if (line1[0] == '*')
+                            {
+                                StringBuilder rj = new StringBuilder();
+                                for(int i = 1; i < tri[0].Length; i++)
+                                {
+                                    rj.Append(line1[i]);
+                                }
+                                Albumi.Items.Add(rj);
+                                Rijecnik.Add(Convert.ToInt32(tri[1]), tri[2]);
+                                //a++;
+                                //a = Convert.ToInt32(tri[1]);
+                            }
+                            else
+                            {
+                                br1++;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Let the user know what went wrong.
+                    Console.WriteLine("The file could not be read:");
+                    Console.WriteLine(e.Message);
+                }
+                try
+                {
+                    using (StreamReader sr = new StreamReader(path))  //dodatni prolazak za bilježenje zadnjeg albuma koji se otvorio
+                    {
+                        string line1;                                 // tako znam koje slike treba izredati pri otvaranju programa
 
-        public void ispis() 
-        {
-            
-        }
+                        while ((line1 = sr.ReadLine()) != null)
+                        {
+                            if (line1[0]!='*')
+                            {
+                                br2++;
+                            }
+                            if (br2 == br1 && br2!=0)
+                            {
+                                string[] dva = line1.Split();
+                                indeks_odabranog_albuma = Convert.ToInt32(dva[1]);
+                                Slike.Items.Clear();
+                                nazivi_puteva = System.IO.Directory.GetFileSystemEntries(Rijecnik[indeks_odabranog_albuma]);
 
+                                foreach (string s in nazivi_puteva)
+                                {
+                                    string[] stringSeparators = new string[] { "\\" };
+                                    string[] novo = s.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                                    string naziv_slike = novo[novo.Length - 1];
+                                  
+                                    Slike.Items.Add(naziv_slike + "      ");
+
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Let the user know what went wrong.
+                    Console.WriteLine("The file could not be read:");
+                    Console.WriteLine(e.Message);
+                }
+            }
+        }
+        
         Dictionary<int, string> Rijecnik = new Dictionary<int, string>();   //riječnik
-        int a = 0;
+        
         private void button1_Click(object sender, EventArgs e)     ///dodavanje albuma u listu
         {
             if (Directory.Exists(textBox1.Text))/// dodala provjeru za postojanje albuma
-            {                                   
-                Rijecnik.Add(a, textBox1.Text);
-                a++;
-
+            {
                 string[] stringSeparators = new string[] { "\\" };
                 string[] novo = textBox1.Text.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
                 string naziv_albuma = novo[novo.Length - 1];
+
                 Albumi.Items.Add(naziv_albuma);
+                Rijecnik.Add(a, textBox1.Text);
+
+                string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //spremanje u datoteku
+                using (StreamWriter sw = File.AppendText(path))
+                {
+                    sw.WriteLine('*'+naziv_albuma+" "+ a +" " +textBox1.Text);
+                }
+                a++;
+
             }
             else
             {
                 DirectoryInfo novi_album = Directory.CreateDirectory(textBox1.Text);   //napravi novi album ako ne postoji odabrani
 
-                Rijecnik.Add(a, textBox1.Text);
-                a++;
-
                 string[] stringSeparators = new string[] { "\\" };
                 string[] novo = textBox1.Text.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
                 string naziv_albuma = novo[novo.Length - 1];
                 Albumi.Items.Add(naziv_albuma);
+
+                string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";  //spremanje u datoteku
+                using (StreamWriter sw = File.AppendText(path))
+                {
+                    sw.WriteLine('*' + naziv_albuma + " " + a + " " + textBox1.Text);
+                }
+                Rijecnik.Add(a, textBox1.Text);
+                a++;
             }
         }
-        Button tipka_x = new Button();
 
         int indeks_odabranog_albuma=0;
         string[] nazivi_puteva;
+
         private void button2_Click(object sender, EventArgs e)       /// otvaranje albuma
         {
             string naziv_albuma = Albumi.SelectedItem.ToString();
             indeks_odabranog_albuma = Albumi.SelectedIndex;
 
+
             Slike.Items.Clear();
             nazivi_puteva = System.IO.Directory.GetFileSystemEntries(Rijecnik[indeks_odabranog_albuma]);
+            
             
             foreach (string s in nazivi_puteva)
             {
@@ -69,12 +158,16 @@ namespace WindowsFormsApp11
                 string naziv_slike = novo[novo.Length - 1];
                 //Button tipka_x = new Button();
                 Slike.Items.Add(naziv_slike +"      ");
-              
-                tipka_x.DialogResult = DialogResult.OK;
-                
+               
             }
-            
+            string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //spremanje u datoteku
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                sw.WriteLine( naziv_albuma+" "+indeks_odabranog_albuma);
+            }
+
         }
+
         private void Tipka_X(object seneder, EventArgs e)           // brisanje odabrane slike
         {
             string odabrana_slika = Slike.SelectedItem.ToString();
@@ -82,12 +175,15 @@ namespace WindowsFormsApp11
             Slike.Items.RemoveAt(indeks_slike);
 
             File.Delete(nazivi_puteva[indeks_slike]);
+
+            pictureBox1.Image = null;
         }
+
 
         private void button4_Click(object sender, EventArgs e)   //dodavanje slika u obliku cut-paste
         {
             string zadnji_put = "";
-            if (nazivi_puteva.Length==0) 
+            if (nazivi_puteva.Length==0)                                //ako je album prazan ili ako nije prazan
             {
                 zadnji_put = Rijecnik[indeks_odabranog_albuma];
 
@@ -166,6 +262,15 @@ namespace WindowsFormsApp11
                 Slike.Items.Clear();
             }
             Directory.Delete(Rijecnik[indeks_odabranog_albuma]);
+
+            pictureBox1.Image = null;
+        }
+
+
+        private void Slike_MouseClick(object sender, MouseEventArgs e)
+        {
+            pictureBox1.ImageLocation = nazivi_puteva[Slike.SelectedIndex];
+
         }
     }
 }
