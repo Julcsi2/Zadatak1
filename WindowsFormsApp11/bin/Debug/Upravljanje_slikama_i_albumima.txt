@@ -1,0 +1,5 @@
+*Datoteka3 0 C:\Users\Júlia\Desktop\Datoteka\Datoteka3
+*Datoteka5 1 C:\Users\Júlia\Desktop\Datoteka\Datoteka5
+Datoteka3 0
+Datoteka5 1
+Datoteka3 0

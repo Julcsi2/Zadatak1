@@ -17,9 +17,18 @@ namespace WindowsFormsApp11
         public Form1()
         {
             InitializeComponent();
+
+            string path1 = @"C:\temp";
+            if (!(Directory.Exists(path1))) {
+                DirectoryInfo novi_album = Directory.CreateDirectory(@"C:\temp");
+            }
+            
+            string path = @"C:\temp\Upravljanje_albumima.txt";
+
+
             int br1 = 0;
             int br2 = 0;
-            string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //ispis iz datoteke
+            //string path = @"C:\Upravljanje_albumima.txt";   //ispis iz datoteke
             if (File.Exists(path))/// dodala provjeru za postojanje datoteke
             {
                 try
@@ -96,6 +105,14 @@ namespace WindowsFormsApp11
                     Console.WriteLine(e.Message);
                 }
             }
+            else
+            {
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    sw.Write("");
+                }
+
+            }
         }
         
         Dictionary<int, string> Rijecnik = new Dictionary<int, string>();   //riječnik
@@ -111,7 +128,7 @@ namespace WindowsFormsApp11
                 Albumi.Items.Add(naziv_albuma);
                 Rijecnik.Add(a, textBox1.Text);
 
-                string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //spremanje u datoteku
+                string path = @"C:\temp\Upravljanje_albumima.txt";   //spremanje u datoteku
                 using (StreamWriter sw = File.AppendText(path))
                 {
                     sw.WriteLine('*'+naziv_albuma+" "+ a +" " +textBox1.Text);
@@ -128,7 +145,7 @@ namespace WindowsFormsApp11
                 string naziv_albuma = novo[novo.Length - 1];
                 Albumi.Items.Add(naziv_albuma);
 
-                string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";  //spremanje u datoteku
+                string path = @"C:\temp\Upravljanje_albumima.txt";    //spremanje u datoteku
                 using (StreamWriter sw = File.AppendText(path))
                 {
                     sw.WriteLine('*' + naziv_albuma + " " + a + " " + textBox1.Text);
@@ -160,7 +177,7 @@ namespace WindowsFormsApp11
                 Slike.Items.Add(naziv_slike +"      ");
                
             }
-            string path = @"C:\Users\Júlia\Desktop\Datoteka\Spremanje.txt";   //spremanje u datoteku
+            string path = @"C:\temp\Upravljanje_albumima.txt";      //spremanje u datoteku
             using (StreamWriter sw = File.AppendText(path))
             {
                 sw.WriteLine( naziv_albuma+" "+indeks_odabranog_albuma);
