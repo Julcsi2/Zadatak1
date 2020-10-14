@@ -17,7 +17,7 @@ namespace WindowsFormsApp11
         public Form1()
         {
             InitializeComponent();
-
+            
             string path1 = @"C:\temp";
             if (!(Directory.Exists(path1))) {
                 DirectoryInfo novi_album = Directory.CreateDirectory(@"C:\temp");
@@ -48,8 +48,8 @@ namespace WindowsFormsApp11
                                     rj.Append(line1[i]);
                                 }
                                 Albumi.Items.Add(rj);
-                                Rijecnik.Add(Convert.ToInt32(tri[1]), tri[2]);
-                                //a++;
+                                Rijecnik.Add(a, tri[2]);//Convert.ToInt32(tri[1]), tri[2]);
+                                a++;
                                 //a = Convert.ToInt32(tri[1]);
                             }
                             else
@@ -126,13 +126,14 @@ namespace WindowsFormsApp11
                 string naziv_albuma = novo[novo.Length - 1];
 
                 Albumi.Items.Add(naziv_albuma);
-                Rijecnik.Add(a, textBox1.Text);
+                
 
                 string path = @"C:\temp\Upravljanje_albumima.txt";   //spremanje u datoteku
                 using (StreamWriter sw = File.AppendText(path))
                 {
                     sw.WriteLine('*'+naziv_albuma+" "+ a +" " +textBox1.Text);
                 }
+                Rijecnik.Add(a, textBox1.Text);
                 a++;
 
             }
