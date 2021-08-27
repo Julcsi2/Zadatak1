@@ -15,67 +15,93 @@ namespace WindowsFormsApp12
 {
     public partial class Form1 : Form
     {
+        List<podsjeti> podsjetnici = new List<podsjeti>();
+        List<rokO> rokovi = new List<rokO>();
+
         public Form1()
         {
             InitializeComponent();
+            foreach (string data in Enum.GetNames(typeof(Prioritet)))
+            {
+                cbPrioriteti.Items.Add(data);
+            }
+            dateTimePicker1.Value = DateTime.Now;
+            dateTimePicker2.Value = DateTime.Now;
+            getPodsjetnici();
+        }
 
+        public class podsjeti
+        {
+            public string naziv { get; set; }
+            public TimeSpan interval { get; set; }
+            public DateTime date { get; set; }
+        }
+
+        public class rokO
+        {
+            public string putanja { get; set; }
+            public DateTime rok { get; set; }
         }
 
         public class zadatak
         {
             public string naziv { get; set; }
             public string opis { get; set; }
-            public string rok { get; set; }
-            public string vrijeme_podsjetnika { get; set; }
+            public DateTime rok { get; set; }
+            public DateTime vrijeme_podsjetnika { get; set; }
             public string prioritet { get; set; }
             public bool arhiviran { get; set; }
         }
-        
+
 
         private void button1_Click(object sender, EventArgs e)    // klikom se stvori novi zadatak i novi .json
         {
             zadatak zad = new zadatak();
             zad.naziv = textBox1.Text;
             zad.opis = textBox2.Text;
-            zad.rok = textBox3.Text;
-            zad.vrijeme_podsjetnika = textBox4.Text;
-            zad.prioritet = textBox5.Text;
+            DateTime d = dtRok.Value;
+            DateTime t = dateTimePicker2.Value;
+            zad.rok = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second);
+            d = dtPodsjeti.Value;
+            t = dateTimePicker1.Value;
+            zad.vrijeme_podsjetnika = zad.vrijeme_podsjetnika = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second);
+            zad.prioritet = cbPrioriteti.SelectedItem.ToString();
 
             string result = JsonConvert.SerializeObject(zad);
 
             if (Directory.Exists(@"C:\temp1"))
             {
-                string path = @"C:\temp1\"+ textBox1.Text + ".json";
-
-                using (var tw = new StreamWriter(path, true))
-                {
-                    tw.WriteLine(result.ToString());
-                    tw.Close();
-                }
-            }
-            else
-            {
-                DirectoryInfo novi_album = Directory.CreateDirectory(@"C:\temp1");
                 string path = @"C:\temp1\" + textBox1.Text + ".json";
 
                 using (var tw = new StreamWriter(path, true))
                 {
                     tw.WriteLine(result.ToString());
-                    tw.Close();
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(@"C:\temp1");
+                string path = @"C:\temp1\" + textBox1.Text + ".json";
+
+                using (var tw = new StreamWriter(path, true))
+                {
+                    tw.WriteLine(result.ToString());
                 }
 
             }
             textBox1.Text = "";
             textBox2.Text = "";
-            textBox3.Text = "";
-            textBox4.Text = "";
-            textBox5.Text = "";
+            dtRok.Value = DateTime.Now;
+            dtPodsjeti.Value = DateTime.Now;
+            dateTimePicker1.Value = DateTime.Now;
+            cbPrioriteti.SelectedIndex = -1;
+            getPodsjetnici();
 
         }
 
         private void button2_Click(object sender, EventArgs e)         // klikom se ispišu svi aktivni zadaci
         {
-            Array svi_zadaci = System.IO.Directory.GetFileSystemEntries(@"C:\temp1");
+            Array svi_zadaci = Directory.GetFileSystemEntries(@"C:\temp1");
             Zadaci.Items.Clear();
 
             //ispis svih hitnih zadataka    --- na početak
@@ -92,18 +118,19 @@ namespace WindowsFormsApp12
                 }
 
                 //za čitanje jsona
-                StreamReader r = new StreamReader(@"C:\temp1\"+naziv_zadatka);
-                string jsonString = r.ReadToEnd();                
-                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
+                using (StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka))
+                {
+                    string jsonString = r.ReadToEnd();
+                    zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-                //za ispis svih aktivnih zadataka 
-                if (!zad.arhiviran) 
-                { 
-                    if(zad.prioritet=="hitno" || zad.prioritet=="Hitno")
+                    //za ispis svih aktivnih zadataka 
+                    if (!zad.arhiviran)
                     {
-                        Zadaci.Items.Add(naziv);
+                        if (zad.prioritet == "hitno" || zad.prioritet == "Hitno")
+                        {
+                            Zadaci.Items.Add(naziv);
+                        }
                     }
-                    
                 }
             }
             //ispis svih ne hitnih zadataka  -- idu na kraj dok hitni idu na početak
@@ -120,18 +147,21 @@ namespace WindowsFormsApp12
                 }
 
                 //za čitanje jsona
-                StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka);
-                string jsonString = r.ReadToEnd();
-                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
-
-                //za ispis svih aktivnih zadataka 
-                if (!zad.arhiviran)
+                using (
+                StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka))
                 {
-                    if (zad.prioritet != "hitno" && zad.prioritet != "Hitno")
-                    {
-                        Zadaci.Items.Add(naziv);
-                    }
+                    string jsonString = r.ReadToEnd();
+                    zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
+                    //za ispis svih aktivnih zadataka 
+                    if (!zad.arhiviran)
+                    {
+                        if (zad.prioritet != "hitno" && zad.prioritet != "Hitno")
+                        {
+                            Zadaci.Items.Add(naziv);
+                        }
+
+                    }
                 }
             }
 
@@ -156,13 +186,15 @@ namespace WindowsFormsApp12
                 }
 
                 //za čitanje jsona
-                StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka);
-                string jsonString = r.ReadToEnd();
-                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
+                using (StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka))
+                {
+                    string jsonString = r.ReadToEnd();
+                    zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-                //za ispis svih arhiviranih zadataka 
-                if (zad.arhiviran)
-                { Zadaci.Items.Add(naziv); }
+                    //za ispis svih arhiviranih zadataka 
+                    if (zad.arhiviran)
+                    { Zadaci.Items.Add(naziv); }
+                }
 
 
             }
@@ -171,26 +203,25 @@ namespace WindowsFormsApp12
         private void Zadaci_SelectedIndexChanged(object sender, EventArgs e)   // kada se klikne na neki od zadataka on se ispiše u najdesniji prozor
         {
             string zadatak_ime = Zadaci.SelectedItem.ToString();
-            
-            StreamReader r = new StreamReader(@"C:\temp1\"+zadatak_ime+".json" );
-            string jsonString = r.ReadToEnd();
-            zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-            Zadatak.Items.Clear();
+            using (StreamReader r = new StreamReader(@"C:\temp1\" + zadatak_ime + ".json"))
+            {
+                string jsonString = r.ReadToEnd();
+                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-            Zadatak.Items.Add("Naziv: " + zad.naziv);
-            Zadatak.Items.Add("Opis: " + zad.opis);
-            Zadatak.Items.Add("Rok: " + zad.rok);
-            Zadatak.Items.Add("Vrijeme podsjetnika: " + zad.vrijeme_podsjetnika);
-            Zadatak.Items.Add("Prioritet: " + zad.prioritet);
-            
+                Zadatak.Items.Clear();
+
+                Zadatak.Items.Add("Naziv: " + zad.naziv);
+                Zadatak.Items.Add("Opis: " + zad.opis);
+                Zadatak.Items.Add("Rok: " + zad.rok);
+                Zadatak.Items.Add("Vrijeme podsjetnika: " + zad.vrijeme_podsjetnika);
+                Zadatak.Items.Add("Prioritet: " + zad.prioritet);
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)      // mijenjanje je riješeno zamjenom postojećeg s novim
         {
-            timer.Stop();
-            timer1.Stop();
-            string zadatak_ime = Zadaci.SelectedItem.ToString(); 
+            string zadatak_ime = Zadaci.SelectedItem.ToString();
 
             if (File.Exists(@"C:\temp1\" + zadatak_ime + ".json"))
             {
@@ -200,9 +231,13 @@ namespace WindowsFormsApp12
                 zadatak zad = new zadatak();        //spremanje novih/straih podataka
                 zad.naziv = textBox1.Text;
                 zad.opis = textBox2.Text;
-                zad.rok = textBox3.Text;
-                zad.vrijeme_podsjetnika = textBox4.Text;
-                zad.prioritet = textBox5.Text;
+                DateTime d = dtRok.Value;
+                DateTime t = dateTimePicker2.Value;
+                zad.rok = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second);
+                d = dtPodsjeti.Value;
+                t = dateTimePicker1.Value;
+                zad.vrijeme_podsjetnika = zad.vrijeme_podsjetnika = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second);
+                zad.prioritet = cbPrioriteti.SelectedItem.ToString();
                 string result = JsonConvert.SerializeObject(zad);
 
                 string path = @"C:\temp1\" + textBox1.Text + ".json";  //sve što je novo ili što nije ponovno sprema
@@ -210,38 +245,39 @@ namespace WindowsFormsApp12
                 using (var tw = new StreamWriter(path, true))
                 {
                     tw.WriteLine(result.ToString());
-                    tw.Close();
                 }
 
                 textBox1.Text = "";  //kad je gotovo neka isprazni 
                 textBox2.Text = "";
-                textBox3.Text = "";
-                textBox4.Text = "";
-                textBox5.Text = "";
+                dtRok.Value = DateTime.Now;
+                dtPodsjeti.Value = DateTime.Now;
+                dateTimePicker1.Value = DateTime.Now;
+                cbPrioriteti.SelectedIndex = -1;
 
             }
-            timer.Start();
-            timer1.Start();
+            getPodsjetnici();
         }
 
         private void button4_Click(object sender, EventArgs e)     // prebaci sve trenutne podatke u textBoxove gdje se mogu mijenjati
         {
-    
+
             string zadatak_ime = Zadaci.SelectedItem.ToString();
 
             //čitanje iz jsona
-            StreamReader r = new StreamReader(@"C:\temp1\" + zadatak_ime + ".json");
-            string jsonString = r.ReadToEnd();
-            zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
+            using (StreamReader r = new StreamReader(@"C:\temp1\" + zadatak_ime + ".json"))
+            {
+                string jsonString = r.ReadToEnd();
+                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-            //očisti listbox Zadatak i sav tekst prebaci na početak gdje se može mijenjati
-            Zadatak.Items.Clear();
+                //očisti listbox Zadatak i sav tekst prebaci na početak gdje se može mijenjati
+                Zadatak.Items.Clear();
 
-            textBox1.Text = zad.naziv;
-            textBox2.Text = zad.opis;
-            textBox3.Text = zad.rok;
-            textBox4.Text = zad.vrijeme_podsjetnika;
-            textBox5.Text = zad.prioritet;
+                textBox1.Text = zad.naziv;
+                textBox2.Text = zad.opis;
+                dtRok.Value = zad.rok;
+                dtPodsjeti.Value = zad.vrijeme_podsjetnika;
+                cbPrioriteti.SelectedItem = zad.prioritet;
+            }
         }
 
         private void button6_Click(object sender, EventArgs e)    //Brisanje odabranog zadatka briše njegov .json
@@ -258,215 +294,98 @@ namespace WindowsFormsApp12
             timer1.Start();
         }
 
-        private void timer_Tick(object sender, EventArgs e)       // timer za podsječanje na neki zadatak
+        private void getPodsjetnici()                             // Za dohvacanje
         {
-            Array svi_zadaci = System.IO.Directory.GetFileSystemEntries(@"C:\temp1");     //otvori sve zadatke
-            string vrijeme_pod = "";
-            string nazivi_zadataka = "";
-            foreach(string s in svi_zadaci)
+            podsjetnici.Clear();
+            rokovi.Clear();
+            timer.Stop();
+            Array svi_zadaci = Directory.GetFileSystemEntries(@"C:\temp1");
+            foreach (string s in svi_zadaci)
             {
-                //za dobivanje imena jsona
-                string[] stringSeparators = new string[] { "\\" };
-                string[] novo = s.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-                string naziv_zadatka = novo[novo.Length - 1];
-                string naziv = "";
-                for (int i = 0; i < naziv_zadatka.Length - 5; i++)
-                {
-                    naziv += naziv_zadatka[i];
-                }
-                //za čitanje jsona
-                StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka);
-                string jsonString = r.ReadToEnd();
-                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
 
-                //dobivanje svih vremena za podsjetnike i naziva zadataka
-                if (!zad.arhiviran)
+                using (StreamReader r = new StreamReader(s))
                 {
-                    vrijeme_pod += zad.vrijeme_podsjetnika + " ";
-                    nazivi_zadataka += zad.naziv + " ";
-                }
-                
-            }
-            string[] svi_podsjetnici = vrijeme_pod.Split(' ');
-            string[] svi_nazivi = nazivi_zadataka.Split(' ');
-            int a = -1;  //broj koji će dati indeks
-            int b = -1;  //broj za separiranje
-            //string broj5 = "";
-            foreach (string s in svi_podsjetnici)
-            {
-                string[] l = s.Split(new string[]{ "," }, StringSplitOptions.RemoveEmptyEntries);
-                a++;
-                //int x = Convert.ToInt32(l[4]);
+                    string jsonString = r.ReadToEnd();
+                    zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
+                    if (!zad.arhiviran)
+                    {
+                        TimeSpan ts = zad.vrijeme_podsjetnika.Subtract(DateTime.Now);
+                        if (ts.TotalMilliseconds > 0)
+                            podsjetnici.Add(new podsjeti
+                            {
+                                naziv = zad.naziv,
+                                date = zad.vrijeme_podsjetnika,
+                                interval = ts
+                            });
+                        rokovi.Add(new rokO
+                        {
+                            putanja = s,
+                            rok = zad.rok
+                        });
+                    }
 
-                //int y = Convert.ToInt32(l[3]);
-                //Console.WriteLine(y);
-                b = -1;
-                string broj2 = ""; //dan
-                string broj3 = "";//sati
-                string broj4 = "";//minute
-                foreach(char slovo in s)   //petlja da dobijem dane, sate i minute
-                {
-                    if (b == 1 && slovo != ',')
-                    {
-                        broj2 += slovo;
-                    }
-                    if (b == 2 && slovo!=',')
-                    {
-                        broj3 += slovo;                       
-                    }
-                    if (b == 3 && slovo!=',')
-                    {
-                        broj4 += slovo;
-                    }
-                    
-                    if (slovo == ',')
-                    {
-                        b++;
-                    }
-                }
-                if (broj2 == "")
-                {
-                    broj2 += 0;
-                }
-                if (broj3 == "")
-                {
-                    broj3 += 0;
-                }
-                if (broj4 == "")
-                {
-                    broj4 += 0;
-                }
-                // Uzela sam samo sate i minute jer želim da me što prije podsjeti
-                //Console.WriteLine(broj4);
-                if (DateTime.Now.Day== (1*Convert.ToInt32(broj2.ToString())) && DateTime.Now.Hour==(1*Convert.ToInt32(broj3.ToString())) && DateTime.Now.Minute == (1*Convert.ToInt32(broj4.ToString())) )//&& DateTime.Now.Second==20)
-                {
-                   MessageBox.Show("Podsjetnik za zadatak naziva: "+svi_nazivi[a+1]);
                 }
             }
-            //Console.WriteLine("tick");
+            podsjetnici = podsjetnici.OrderBy(x => x.interval).ToList();
+            if (podsjetnici.Count > 0)
+            {
+                timer.Interval = Convert.ToInt32(podsjetnici[0].interval.TotalMilliseconds);
+                timer.Start();
+            }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)   //Ne valja   služilo bi za arhiviranje
-        {   /*
-            Array svi_zadaci = System.IO.Directory.GetFileSystemEntries(@"C:\temp1");     //otvori sve zadatke
-            string vrijeme_roka = "";
-            string nazivi_zadataka = "";
-            string ime = "";
-            foreach (string s in svi_zadaci)
-            {   
-                
-                //za dobivanje imena jsona
-                string[] stringSeparators = new string[] { "\\" };
-                string[] novo = s.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
-                string naziv_zadatka = novo[novo.Length - 1];
-                string naziv = "";
-                for (int i = 0; i < naziv_zadatka.Length - 5; i++)
+        private void timer_Tick(object sender, EventArgs e)       // timer za podsječanje na neki zadatak
+        {
+            timer.Stop();
+            podsjetnici.RemoveAt(0);
+            if (podsjetnici.Count > 0)
+            {
+                string naziv = podsjetnici[0].naziv;
+                foreach (podsjeti p in podsjetnici)
                 {
-                    naziv += naziv_zadatka[i];
+                    p.interval = p.date.Subtract(DateTime.Now);
                 }
-                //za čitanje jsona
-                StreamReader r = new StreamReader(@"C:\temp1\" + naziv_zadatka);
-                string jsonString = r.ReadToEnd();
-                zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
-
-                //dobivanje svih vremena za rokove i nazive
-                if (!zad.arhiviran)
-                {
-                    vrijeme_roka += zad.vrijeme_podsjetnika + " ";
-                    nazivi_zadataka += zad.naziv + " ";
-                }
-
-                string[] svi_rokovi = vrijeme_roka.Split(' ');
-                string[] svi_nazivi = nazivi_zadataka.Split(' ');
-                
-                int b = -1;  //broj za separiranje
-
-                string broj0 = ""; //godina
-                string broj1 = "";  //mjesec
-                string broj2 = "";  //dan
-                string broj3 = "";
-                string broj4 = ""; //minuta
-                string broj5 = ""; //sekunda
-                foreach (char slovo in s)   //petlja da dobijem dane, sate i minute
-                {
-                    if (b == -1 && slovo != ',')
-                    {
-                        broj0 += slovo;
-                    }
-                    if (b == 0 && slovo != ',')
-                    {
-                        broj1 += slovo;
-                    }
-                    if (b == 1 && slovo != ',')
-                    {
-                        broj2 += slovo;
-                    }
-                    if (b == 2 && slovo != ',')
-                    {
-                        broj3 += slovo;
-                    }
-                    if (b == 3 && slovo != ',')
-                    {
-                        broj4 += slovo;
-                    }
-                    if (b == 4 && slovo != ',')
-                    {
-                        broj5 += slovo;
-                    }
-                    if (slovo == ',')
-                    {
-                        b++;
-                    }
-                }
-                if (broj2 == "")
-                {
-                    broj0 = "0"; broj1 = "0";
-                    broj2 += 0; broj3 = "0"; broj4 = "0"; broj5 = "0";
-                }
-
-                TimeSpan rok = new TimeSpan(Convert.ToInt32(broj2), Convert.ToInt32(broj3), Convert.ToInt32(broj4), Convert.ToInt32(broj5));
-                TimeSpan trenutno = new TimeSpan(DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-
-                int result = TimeSpan.Compare(rok, trenutno);
-
-                if (result == 0 || result==-1)    //arhiviranje
-                {
-                    zadatak zad2 = new zadatak();
-                    zad2.naziv = zad.naziv;
-                    zad2.opis = zad.opis;
-                    zad2.rok = zad.rok;
-                    zad2.vrijeme_podsjetnika = zad.vrijeme_podsjetnika;
-                    zad2.prioritet = zad.prioritet;
-                    zad2.arhiviran = true;
-
-                    string result2 = JsonConvert.SerializeObject(zad2);
-                    Zadatak.Items.Clear();
-                    Zadaci.Items.Clear();
-                    File.Delete(@"C:\temp1\" + zad.naziv + ".json");
-                    string path = @"C:\temp1\" + zad2.naziv + ".json";  //spremit će kao arhivirano
-
-                    using (var tw = new StreamWriter(path, true))
-                    {
-                        tw.WriteLine(result2.ToString());
-                        tw.Close();
-                    }
-
-                    Zadaci.Items.Clear();
-                    button2_Click(sender, e);
-                }
-                
-            }/*
-            //kada otvorimo program samo onda treba provjeriti ima li novih arhiviranih
-            timer1.Enabled = false;
-            timer1.Stop();
-            timer.Enabled = true;
-            timer.Start();
+                timer.Interval = Convert.ToInt32(podsjetnici[0].interval.TotalMilliseconds);
+                timer.Start();
+                MessageBox.Show("Podsjetnik za zadatak " + naziv, "Podsjetnik");
+            }
             
-             */
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)   //Služi za arhiviranje
+        {
+            DateTime now = DateTime.Now;
+            if (rokovi.Any(x => x.rok < now))
+            {
+                foreach (rokO r in rokovi.Where(x => x.rok < now))
+                {
+                    string jsonString;
+                    using (StreamReader sr = new StreamReader(r.putanja))
+                    {
+                        jsonString = sr.ReadToEnd();
+                    }
+                    using (StreamWriter sw = new StreamWriter(r.putanja, false))
+                    {
+                        zadatak zad = JsonConvert.DeserializeObject<zadatak>(jsonString);
+                        zad.arhiviran = true;
+                        sw.WriteLine(JsonConvert.SerializeObject(zad));
+                    }
+                }
+                rokovi.RemoveAll(x => x.rok < now);
+                if (rokovi.Count == 0) timer1.Stop();
+            }
+            
         }
 
 
 
         //var date1 = new DateTime(2008, 5, 1, 8, 30, 52); 
+    }
+
+    public enum Prioritet
+    {
+        Nizak = 1,
+        Visok = 2,
+        Hitno = 3
     }
 }
